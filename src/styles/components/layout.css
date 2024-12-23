@@ -1,0 +1,30 @@
+.container {
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding: 0 var(--spacing-6);
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-4 {
+  gap: var(--spacing-4);
+}
+
+.py-6 {
+  padding-top: var(--spacing-6);
+  padding-bottom: var(--spacing-6);
+}

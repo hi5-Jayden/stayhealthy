@@ -1,0 +1,25 @@
+/* Form styles */
+.form-control {
+  height: 48px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  padding: 0 var(--spacing-4);
+}
+
+.form-control:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+  outline: none;
+}
+
+.form-label {
+  margin-bottom: var(--spacing-2);
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.form-error {
+  color: var(--color-red);
+  font-size: 0.875rem;
+  margin-top: var(--spacing-1);
+}

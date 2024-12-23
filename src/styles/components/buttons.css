@@ -1,0 +1,26 @@
+.btn {
+  padding: var(--spacing-3) var(--spacing-6);
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  transition: var(--transition-default);
+  height: 48px;
+}
+
+.btn-primary {
+  background: linear-gradient(
+    to right,
+    var(--color-primary-start),
+    var(--color-primary-end)
+  );
+  color: var(--color-white);
+}
+
+.btn-secondary {
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+}
+
+.btn-danger {
+  background-color: var(--color-red);
+  color: var(--color-white);
+}
