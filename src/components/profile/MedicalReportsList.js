@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PDFPreviewModal from './PDFPreviewModal';
 import {
   VStack,
   HStack,
@@ -12,11 +13,13 @@ import {
   Badge,
   Select,
   useToast,
+  useDisclosure,
 } from '@chakra-ui/react';
 import { Search, FileText, Download, Calendar } from 'lucide-react';
 
 const ReportCard = ({ report }) => {
   const toast = useToast();
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const handleDownload = async () => {
     try {
@@ -38,41 +41,50 @@ const ReportCard = ({ report }) => {
   };
 
   return (
-    <Card variant="outline" mb={4}>
-      <CardBody>
-        <HStack justify="space-between" align="start">
-          <VStack align="start" spacing={2}>
-            <HStack>
-              <FileText size={20} className="text-blue-500" />
-              <Text fontWeight="bold">{report.title}</Text>
-            </HStack>
+    <>
+      <Card variant="outline" mb={4}>
+        <CardBody>
+          <HStack justify="space-between" align="start">
+            <VStack align="start" spacing={2}>
+              <HStack
+                onClick={onOpen}
+                cursor="pointer"
+                _hover={{ color: 'blue.500' }}
+              >
+                <FileText size={20} className="text-blue-500" />
+                <Text fontWeight="bold">{report.title}</Text>
+              </HStack>
 
-            <HStack color="gray.600" fontSize="sm">
-              <Calendar size={16} />
-              <Text>{new Date(report.date).toLocaleDateString()}</Text>
-            </HStack>
+              <HStack color="gray.600" fontSize="sm">
+                <Calendar size={16} />
+                <Text>{new Date(report.date).toLocaleDateString()}</Text>
+              </HStack>
 
-            <Badge colorScheme={report.status === 'new' ? 'green' : 'gray'}>
-              {report.status === 'new' ? 'New' : 'Viewed'}
-            </Badge>
+              <Badge colorScheme={report.status === 'new' ? 'green' : 'gray'}>
+                {report.status === 'new' ? 'New' : 'Viewed'}
+              </Badge>
 
-            <Text color="gray.600" fontSize="sm">
-              Doctor: {report.doctorName}
-            </Text>
-          </VStack>
+              <Text color="gray.600" fontSize="sm">
+                Doctor: {report.doctorName}
+              </Text>
+            </VStack>
 
-          <Button
-            leftIcon={<Download size={16} />}
-            colorScheme="blue"
-            variant="outline"
-            size="sm"
-            onClick={handleDownload}
-          >
-            Download
-          </Button>
-        </HStack>
-      </CardBody>
-    </Card>
+            <Button
+              leftIcon={<Download size={16} />}
+              colorScheme="blue"
+              variant="outline"
+              size="sm"
+              onClick={handleDownload}
+            >
+              Download
+            </Button>
+          </HStack>
+        </CardBody>
+      </Card>
+
+      {/* Preview Modal */}
+      <PDFPreviewModal isOpen={isOpen} onClose={onClose} report={report} />
+    </>
   );
 };
 
