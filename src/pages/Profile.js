@@ -169,9 +169,7 @@ const ProfilePage = () => {
                     <Heading size="md" mb={4}>
                       Medical Reports
                     </Heading>
-                    {reports.map((report) => (
-                      <MedicalReportCard key={report.id} report={report} />
-                    ))}
+                    <MedicalReportsList />
                   </VStack>
                 </TabPanel>
 

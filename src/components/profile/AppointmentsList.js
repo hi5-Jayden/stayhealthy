@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import RescheduleModal from './RescheduleModal';
 import {
   VStack,
   HStack,
@@ -19,9 +20,18 @@ import {
 import { Calendar, Clock, AlertCircle } from 'lucide-react';
 import { useNotification } from '../../context/NotificationContext';
 
-const AppointmentCard = ({ appointment, onCancel }) => {
+const AppointmentCard = ({ appointment, onCancel, onReschedule }) => {
   const isUpcoming = new Date(appointment.date) > new Date();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isCancelOpen,
+    onOpen: onCancelOpen,
+    onClose: onCancelClose,
+  } = useDisclosure();
+  const {
+    isOpen: isRescheduleOpen,
+    onOpen: onRescheduleOpen,
+    onClose: onRescheduleClose,
+  } = useDisclosure();
 
   return (
     <>
@@ -49,14 +59,22 @@ const AppointmentCard = ({ appointment, onCancel }) => {
             <Text color="gray.600">{appointment.type}</Text>
 
             {isUpcoming && (
-              <HStack justify="flex-end">
+              <HStack justify="flex-end" spacing={2}>
+                <Button
+                  size="sm"
+                  colorScheme="blue"
+                  variant="outline"
+                  onClick={onRescheduleOpen}
+                >
+                  Reschedule
+                </Button>
                 <Button
                   size="sm"
                   colorScheme="red"
                   variant="outline"
-                  onClick={onOpen}
+                  onClick={onCancelOpen}
                 >
-                  Cancel Appointment
+                  Cancel
                 </Button>
               </HStack>
             )}
@@ -65,7 +83,7 @@ const AppointmentCard = ({ appointment, onCancel }) => {
       </Card>
 
       {/* Cancel Confirmation Modal */}
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isCancelOpen} onClose={onCancelClose}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Cancel Appointment</ModalHeader>
@@ -98,6 +116,14 @@ const AppointmentCard = ({ appointment, onCancel }) => {
           </ModalFooter>
         </ModalContent>
       </Modal>
+
+      {/* Reschedule Modal */}
+      <RescheduleModal
+        isOpen={isRescheduleOpen}
+        onClose={onRescheduleClose}
+        appointment={appointment}
+        onReschedule={onReschedule}
+      />
     </>
   );
 };
@@ -132,6 +158,16 @@ const AppointmentsList = () => {
   ]);
 
   const handleCancelAppointment = (appointmentId) => {
+    // In real app, would make API call here
+    setAppointments((prev) =>
+      prev.map((app) =>
+        app.id === updatedAppointment.id ? updatedAppointment : app
+      )
+    );
+    success('Appointment rescheduled successfully');
+  };
+
+  const handleRescheduleAppointment = (updatedAppointment) => {
     // In real app, would make API call here
     setAppointments(appointments.filter((app) => app.id !== appointmentId));
     success('Appointment cancelled successfully');
@@ -170,6 +206,7 @@ const AppointmentsList = () => {
             key={appointment.id}
             appointment={appointment}
             onCancel={handleCancelAppointment}
+            onReschedule={handleRescheduleAppointment}
           />
         ))
       )}
