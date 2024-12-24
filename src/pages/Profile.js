@@ -160,12 +160,7 @@ const ProfilePage = () => {
                     <Heading size="md" mb={4}>
                       Your Appointments
                     </Heading>
-                    {appointments.map((appointment) => (
-                      <AppointmentCard
-                        key={appointment.id}
-                        appointment={appointment}
-                      />
-                    ))}
+                    <AppointmentsList />
                   </VStack>
                 </TabPanel>
 

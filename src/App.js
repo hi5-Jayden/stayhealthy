@@ -23,6 +23,7 @@ import DoctorSearch from './pages/DoctorSearch';
 import AppointmentBooking from './pages/AppointmentBooking';
 import SelfCheckup from './pages/SelfCheckup';
 import HealthTips from './pages/HealthTips';
+import Profile from './pages/Profile';
 
 const App = () => {
   return (
@@ -43,6 +44,14 @@ const App = () => {
               <Route path="/services/health-tips" element={<HealthTips />} />
 
               {/* Protected Routes */}
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/appointment/book"
                 element={
