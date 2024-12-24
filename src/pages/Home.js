@@ -4,11 +4,11 @@ import {
   Container,
   Heading,
   Text,
-  SimpleGrid,
   VStack,
-  Image,
+  SimpleGrid,
   Card,
   CardBody,
+  Image,
   useDisclosure,
   Modal,
   ModalOverlay,
@@ -21,30 +21,35 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const ServiceCard = ({ title, imageSrc, isSelected, isProtected, onClick }) => (
+const ServiceCard = ({ title, imageSrc, isProtected, onClick }) => (
   <Card
     cursor="pointer"
     overflow="hidden"
     variant="outline"
-    bg={isSelected ? 'blue.50' : 'white'}
-    borderColor={isSelected ? 'blue.200' : 'gray.200'}
-    onClick={onClick}
     _hover={{
+      transform: 'translateY(-4px)',
+      boxShadow: 'md',
       borderColor: 'blue.200',
-      transform: 'translateY(-2px)',
-      boxShadow: 'sm',
     }}
     transition="all 0.2s"
+    onClick={onClick}
   >
     <CardBody>
       <VStack spacing="4" align="center">
-        <Image
-          src="/api/placeholder/100/100"
-          alt={title}
-          borderRadius="lg"
-          boxSize="100px"
-        />
-        <Text fontWeight="500" textAlign="center" color="gray.800">
+        <Box boxSize="100px" bg="gray.100" borderRadius="lg">
+          <Image
+            src="/api/placeholder/100/100"
+            alt={title}
+            boxSize="100px"
+            objectFit="cover"
+          />
+        </Box>
+        <Text
+          fontWeight="500"
+          fontSize="lg"
+          textAlign="center"
+          color="gray.800"
+        >
           {title}
         </Text>
       </VStack>
@@ -61,25 +66,21 @@ const Home = () => {
   const services = [
     {
       title: 'Instant Consultation',
-      isSelected: false,
       isProtected: true,
       path: '/services/instant-consultation',
     },
     {
       title: 'Book an Appointment',
-      isSelected: true,
       isProtected: true,
       path: '/services/book-appointment',
     },
     {
       title: 'Self Check-up',
-      isSelected: false,
       isProtected: false,
       path: '/services/self-checkup',
     },
     {
       title: 'Health Tips\nand Guidance',
-      isSelected: false,
       isProtected: false,
       path: '/services/health-tips',
     },
@@ -113,12 +114,7 @@ const Home = () => {
             <VStack align="start" spacing="6">
               <Heading as="h1" size="2xl" lineHeight="1.2" color="gray.900">
                 Your Health
-                <Text
-                  as="span"
-                  display="block"
-                  color="blue.500"
-                  fontSize="inherit"
-                >
+                <Text as="span" display="block" color="blue.500">
                   Our Responsibility
                 </Text>
               </Heading>
@@ -143,7 +139,7 @@ const Home = () => {
           <Card bg="white" shadow="lg" py="8">
             <CardBody>
               <VStack spacing="8">
-                <Heading as="h2" size="lg" textAlign="center">
+                <Heading as="h2" size="lg">
                   Our Best Services
                 </Heading>
                 <SimpleGrid
@@ -156,9 +152,15 @@ const Home = () => {
                     <ServiceCard
                       key={service.title}
                       title={service.title}
-                      isSelected={service.isSelected}
                       isProtected={service.isProtected}
-                      onClick={() => handleServiceClick(service)}
+                      onClick={() => {
+                        if (service.isProtected && !isAuthenticated) {
+                          setSelectedService(service);
+                          onOpen();
+                        } else {
+                          navigate(service.path);
+                        }
+                      }}
                     />
                   ))}
                 </SimpleGrid>

@@ -1,4 +1,3 @@
-//src/App.js
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
@@ -24,6 +23,7 @@ import Reviews from './pages/Reviews';
 import DoctorSearch from './pages/DoctorSearch';
 import DoctorProfile from './pages/DoctorProfile';
 import AppointmentBooking from './pages/AppointmentBooking';
+import InstantConsultation from './pages/InstantConsultation.js';
 import HealthTips from './pages/HealthTips';
 import SelfCheckup from './pages/SelfCheckup';
 import Profile from './pages/Profile';
@@ -40,35 +40,64 @@ const App = () => {
                 <Routes>
                   {/* Public Routes */}
                   <Route path="/" element={<Home />} />
-                  <Route path="/services" element={<Services />} />
-                  <Route path="/doctors" element={<DoctorSearch />} />
-                  <Route path="/doctors/:id" element={<DoctorProfile />} />
-                  <Route path="/reviews" element={<Reviews />} />
                   <Route path="/login" element={<LoginForm />} />
                   <Route path="/signup" element={<SignupForm />} />
-                  <Route
-                    path="/services/self-checkup"
-                    element={<SelfCheckup />}
-                  />
+                  <Route path="/services" element={<Services />} />
                   <Route
                     path="/services/health-tips"
                     element={<HealthTips />}
                   />
-
-                  {/* Protected Routes */}
                   <Route
-                    path="/profile"
+                    path="/services/self-checkup"
+                    element={<SelfCheckup />}
+                  />
+
+                  {/* Protected Routes - Require Authentication */}
+                  <Route
+                    path="/services/instant-consultation"
                     element={
                       <ProtectedRoute>
-                        <Profile />
+                        <InstantConsultation />
                       </ProtectedRoute>
                     }
                   />
                   <Route
-                    path="/appointment/book"
+                    path="/services/book-appointment"
                     element={
                       <ProtectedRoute>
                         <AppointmentBooking />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/doctors"
+                    element={
+                      <ProtectedRoute>
+                        <DoctorSearch />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/doctors/:id"
+                    element={
+                      <ProtectedRoute>
+                        <DoctorProfile />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/reviews"
+                    element={
+                      <ProtectedRoute>
+                        <Reviews />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/profile/*"
+                    element={
+                      <ProtectedRoute>
+                        <Profile />
                       </ProtectedRoute>
                     }
                   />
