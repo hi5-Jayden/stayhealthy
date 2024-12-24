@@ -1,4 +1,4 @@
-// src/App.js
+//src/App.js
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
@@ -6,6 +6,7 @@ import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { DoctorProvider } from './context/DoctorContext';
+import { BookingProvider } from './context/BookingContext';
 
 // Common Components
 import Navbar from './components/common/Navbar';
@@ -32,53 +33,50 @@ const App = () => {
     <AuthProvider>
       <NotificationProvider>
         <DoctorProvider>
-          <div className="app">
-            <Navbar />
-            <main className="main-content">
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<Home />} />
-                <Route path="/services" element={<Services />} />
-                <Route path="/doctors" element={<DoctorSearch />} />
-                <Route path="/doctors/:id" element={<DoctorProfile />} />
-                <Route path="/reviews" element={<Reviews />} />
-                <Route path="/login" element={<LoginForm />} />
-                <Route path="/signup" element={<SignupForm />} />
-                <Route
-                  path="/services/self-checkup"
-                  element={<SelfCheckup />}
-                />
-                <Route path="/services/health-tips" element={<HealthTips />} />
+          <BookingProvider>
+            <div className="app">
+              <Navbar />
+              <main className="main-content">
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/" element={<Home />} />
+                  <Route path="/services" element={<Services />} />
+                  <Route path="/doctors" element={<DoctorSearch />} />
+                  <Route path="/doctors/:id" element={<DoctorProfile />} />
+                  <Route path="/reviews" element={<Reviews />} />
+                  <Route path="/login" element={<LoginForm />} />
+                  <Route path="/signup" element={<SignupForm />} />
+                  <Route
+                    path="/services/self-checkup"
+                    element={<SelfCheckup />}
+                  />
+                  <Route
+                    path="/services/health-tips"
+                    element={<HealthTips />}
+                  />
 
-                {/* Protected Routes */}
-                <Route
-                  path="/profile"
-                  element={
-                    <ProtectedRoute>
-                      <Profile />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/appointment/book"
-                  element={
-                    <ProtectedRoute>
-                      <AppointmentBooking />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/services/instant-consult"
-                  element={
-                    <ProtectedRoute>
-                      <InstantConsult />
-                    </ProtectedRoute>
-                  }
-                />
-              </Routes>
-            </main>
-            <Footer />
-          </div>
+                  {/* Protected Routes */}
+                  <Route
+                    path="/profile"
+                    element={
+                      <ProtectedRoute>
+                        <Profile />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/appointment/book"
+                    element={
+                      <ProtectedRoute>
+                        <AppointmentBooking />
+                      </ProtectedRoute>
+                    }
+                  />
+                </Routes>
+              </main>
+              <Footer />
+            </div>
+          </BookingProvider>
         </DoctorProvider>
       </NotificationProvider>
     </AuthProvider>
