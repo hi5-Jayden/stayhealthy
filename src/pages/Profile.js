@@ -1,9 +1,11 @@
+// src/pages/Profile.js
 import React, { useState } from 'react';
 import {
   Box,
   Container,
   SimpleGrid,
   VStack,
+  HStack, // Added missing import
   Heading,
   Text,
   Button,
@@ -22,101 +24,18 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import { Calendar, Clock, FileText, Edit2 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import { useNotification } from '../../context/NotificationContext';
+import { useAuth } from '../context/AuthContext'; // Fixed import path
+import { useNotification } from '../context/NotificationContext'; // Fixed import path
 
-// Components
-const AppointmentCard = ({ appointment }) => (
-  <Card variant="outline" mb={4}>
-    <CardBody>
-      <VStack align="start" spacing={3}>
-        <HStack justify="space-between" w="full">
-          <Heading size="sm">{appointment.doctorName}</Heading>
-          <Badge
-            colorScheme={appointment.status === 'upcoming' ? 'green' : 'gray'}
-          >
-            {appointment.status}
-          </Badge>
-        </HStack>
+// Import the missing components
+import ProfileAppointmentsList from '../components/profile/ProfileAppointmentsList';
+import MedicalReportsList from '../components/profile/MedicalReportsList';
+import EditProfileModal from '../components/profile/EditProfileModal';
 
-        <HStack spacing={4}>
-          <HStack>
-            <Calendar size={16} />
-            <Text>{appointment.date}</Text>
-          </HStack>
-          <HStack>
-            <Clock size={16} />
-            <Text>{appointment.time}</Text>
-          </HStack>
-        </HStack>
-
-        <Text color="gray.600">{appointment.type}</Text>
-      </VStack>
-    </CardBody>
-  </Card>
-);
-
-const MedicalReportCard = ({ report }) => (
-  <Card variant="outline" mb={4}>
-    <CardBody>
-      <HStack justify="space-between">
-        <VStack align="start" spacing={2}>
-          <Heading size="sm">{report.title}</Heading>
-          <Text color="gray.600">{report.date}</Text>
-        </VStack>
-        <Button
-          leftIcon={<FileText size={16} />}
-          variant="outline"
-          colorScheme="blue"
-          size="sm"
-        >
-          Download
-        </Button>
-      </HStack>
-    </CardBody>
-  </Card>
-);
-
-const ProfilePage = () => {
+const Profile = () => {
   const { user } = useAuth();
-  const { success } = useNotification();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [activeTab, setActiveTab] = useState(0);
-
-  // Sample data - would come from API in real app
-  const appointments = [
-    {
-      id: 1,
-      doctorName: 'Dr. Sarah Miller',
-      date: '2024-12-25',
-      time: '10:00 AM',
-      type: 'General Checkup',
-      status: 'upcoming',
-    },
-    {
-      id: 2,
-      doctorName: 'Dr. John Wilson',
-      date: '2024-12-20',
-      time: '2:30 PM',
-      type: 'Follow-up',
-      status: 'completed',
-    },
-  ];
-
-  const reports = [
-    {
-      id: 1,
-      title: 'Annual Health Checkup Report',
-      date: '2024-12-20',
-      fileUrl: '/reports/checkup.pdf',
-    },
-    {
-      id: 2,
-      title: 'Blood Test Results',
-      date: '2024-12-15',
-      fileUrl: '/reports/bloodtest.pdf',
-    },
-  ];
 
   return (
     <Container maxW="6xl" py={8}>
@@ -160,7 +79,7 @@ const ProfilePage = () => {
                     <Heading size="md" mb={4}>
                       Your Appointments
                     </Heading>
-                    <AppointmentsList />
+                    <ProfileAppointmentsList />
                   </VStack>
                 </TabPanel>
 
@@ -204,8 +123,11 @@ const ProfilePage = () => {
           </CardBody>
         </Card>
       </SimpleGrid>
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal isOpen={isOpen} onClose={onClose} currentUser={user} />
     </Container>
   );
 };
 
-export default ProfilePage;
+export default Profile;
