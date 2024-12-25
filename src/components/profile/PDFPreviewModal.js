@@ -16,6 +16,7 @@ import {
   Badge,
   IconButton,
   Tooltip,
+  Heading,
 } from '@chakra-ui/react';
 import {
   Download,
