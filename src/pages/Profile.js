@@ -31,6 +31,7 @@ import { useNotification } from '../context/NotificationContext'; // Fixed impor
 import ProfileAppointmentsList from '../components/profile/ProfileAppointmentsList';
 import MedicalReportsList from '../components/profile/MedicalReportsList';
 import EditProfileModal from '../components/profile/EditProfileModal';
+import ConsultationHistoryView from '../components/profile/ConsultationHistoryView';
 
 const Profile = () => {
   const { user } = useAuth();
