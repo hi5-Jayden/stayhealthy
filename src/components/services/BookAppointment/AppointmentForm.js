@@ -1,29 +1,54 @@
-import React, { useState } from 'react';
+// src/components/services/BookAppointment/AppointmentForm.js
+import React, { useState, useEffect } from 'react';
 import {
   VStack,
   FormControl,
   FormLabel,
   Input,
   Button,
-  Select,
   Textarea,
   HStack,
+  Text,
+  useToast,
+  Card,
+  Avatar,
+  Badge,
 } from '@chakra-ui/react';
+import { Calendar, Clock, User } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
-import { useNotification } from '../../../context/NotificationContext';
+import { useAvailability } from '../../../context/AvailabilityContext';
+import TimeSlotPicker from '../../booking/TimeSlotPicker';
 
-const AppointmentForm = ({ doctor, availableSlots, onSubmit }) => {
+const AppointmentForm = ({ doctor, onSubmit }) => {
   const { user } = useAuth();
-  const { success, error } = useNotification();
+  const { loading: availabilityLoading } = useAvailability();
   const [formData, setFormData] = useState({
     date: '',
     timeSlot: '',
     notes: '',
   });
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
+
+  // Reset time slot when date changes
+  useEffect(() => {
+    if (formData.timeSlot) {
+      setFormData((prev) => ({ ...prev, timeSlot: '' }));
+    }
+  }, [formData.date]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.date || !formData.timeSlot) {
+      toast({
+        title: 'Error',
+        description: 'Please select both date and time slot',
+        status: 'error',
+        duration: 3000,
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       await onSubmit({
@@ -33,66 +58,103 @@ const AppointmentForm = ({ doctor, availableSlots, onSubmit }) => {
         doctorName: doctor.name,
         ...formData,
       });
-      success('Appointment booked successfully');
-    } catch (err) {
-      error('Failed to book appointment');
+
+      toast({
+        title: 'Success',
+        description: 'Appointment booked successfully',
+        status: 'success',
+        duration: 3000,
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to book appointment',
+        status: 'error',
+        duration: 3000,
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
   return (
-    <VStack as="form" onSubmit={handleSubmit} spacing="6" align="stretch">
-      <HStack spacing="4">
+    <VStack spacing={6} align="stretch" as="form" onSubmit={handleSubmit}>
+      {/* Doctor Info Card */}
+      <Card p={4}>
+        <HStack spacing={4}>
+          <Avatar
+            size="lg"
+            name={doctor.name}
+            src={doctor.image || '/api/placeholder/100/100'}
+          />
+          <VStack align="start" spacing={1} flex={1}>
+            <Text fontWeight="bold">{doctor.name}</Text>
+            <Text color="gray.600">{doctor.specialization}</Text>
+            <Badge colorScheme="blue">
+              ${doctor.consultationFee} per visit
+            </Badge>
+          </VStack>
+        </HStack>
+      </Card>
+
+      {/* Date Selection */}
+      <FormControl isRequired>
+        <FormLabel>Select Date</FormLabel>
+        <Input
+          type="date"
+          value={formData.date}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, date: e.target.value }))
+          }
+          min={new Date().toISOString().split('T')[0]}
+          max={
+            new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+              .toISOString()
+              .split('T')[0]
+          }
+        />
+        <Text fontSize="sm" color="gray.500" mt={1}>
+          You can book appointments up to 3 months in advance
+        </Text>
+      </FormControl>
+
+      {/* Time Slot Selection */}
+      {formData.date && (
         <FormControl isRequired>
-          <FormLabel>Date</FormLabel>
-          <Input
-            type="date"
-            name="date"
-            value={formData.date}
-            onChange={handleChange}
-            min={new Date().toISOString().split('T')[0]}
+          <FormLabel>Select Time Slot</FormLabel>
+          <TimeSlotPicker
+            doctorId={doctor.id}
+            selectedDate={formData.date}
+            selectedSlot={formData.timeSlot}
+            onSelectSlot={(slot) =>
+              setFormData((prev) => ({ ...prev, timeSlot: slot }))
+            }
           />
         </FormControl>
+      )}
 
-        <FormControl isRequired>
-          <FormLabel>Time Slot</FormLabel>
-          <Select
-            name="timeSlot"
-            value={formData.timeSlot}
-            onChange={handleChange}
-            placeholder="Select time slot"
-          >
-            {availableSlots?.map((slot) => (
-              <option key={slot} value={slot}>
-                {slot}
-              </option>
-            ))}
-          </Select>
-        </FormControl>
-      </HStack>
-
+      {/* Notes */}
       <FormControl>
-        <FormLabel>Notes (Optional)</FormLabel>
+        <FormLabel>Additional Notes (Optional)</FormLabel>
         <Textarea
-          name="notes"
           value={formData.notes}
-          onChange={handleChange}
-          placeholder="Any additional notes for the doctor..."
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, notes: e.target.value }))
+          }
+          placeholder="Any specific concerns or information for the doctor..."
+          rows={4}
+          resize="vertical"
         />
       </FormControl>
 
       <Button
         type="submit"
-        isLoading={loading}
+        isLoading={loading || availabilityLoading}
+        loadingText="Booking..."
         bgGradient="linear(to-r, brand.primary.500, #6F3AFA)"
         color="white"
         _hover={{ opacity: 0.9 }}
+        isDisabled={!formData.date || !formData.timeSlot}
       >
         Book Appointment
       </Button>
