@@ -12,12 +12,37 @@ import {
   InputLeftElement,
   Input,
   useDisclosure,
+  IconButton,
+  ButtonGroup,
+  Tooltip,
 } from '@chakra-ui/react';
-import { Search, Star } from 'lucide-react';
+import {
+  Search,
+  Star,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from 'lucide-react';
+import { ReviewListSkeleton } from '../../components/common/LoadingSkeletons';
 import ReviewCard from './ReviewCard';
 import ReviewForm from './ReviewForm';
 
+const ITEMS_PER_PAGE = 6;
+
+const PaginationButton = ({ icon: Icon, label, ...props }) => (
+  <Tooltip label={label}>
+    <IconButton
+      icon={<Icon size={16} />}
+      variant="outline"
+      aria-label={label}
+      {...props}
+    />
+  </Tooltip>
+);
+
 const ReviewsList = ({ doctorId, showForm = true }) => {
+  const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState([
     {
       id: 1,
@@ -29,34 +54,42 @@ const ReviewsList = ({ doctorId, showForm = true }) => {
       doctorName: 'Dr. Sarah Miller',
       appointmentType: 'General Checkup',
     },
-    {
-      id: 2,
-      patientName: 'Emma Wilson',
-      rating: 4,
-      comment: 'Very good experience. Would recommend!',
-      date: '2024-12-18',
-      doctorName: 'Dr. Sarah Miller',
-      appointmentType: 'Consultation',
-    },
+    // ... more sample reviews
   ]);
 
   const [sortBy, setSortBy] = useState('recent');
   const [filterRating, setFilterRating] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-
+  const [currentPage, setCurrentPage] = useState(1);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const handleSubmitReview = async (reviewData) => {
-    // In a real app, this would make an API call
     const newReview = {
       id: Date.now(),
-      patientName: 'Current User', // Would come from auth context
+      patientName: 'Current User',
       date: new Date().toISOString(),
       ...reviewData,
     };
 
     setReviews((prev) => [newReview, ...prev]);
+    setCurrentPage(1); // Reset to first page when adding new review
   };
+
+  // Simulate loading state
+  React.useEffect(() => {
+    const loadReviews = async () => {
+      setLoading(true);
+      try {
+        // Simulate API call
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        setLoading(false);
+      } catch (error) {
+        console.error('Failed to load reviews:', error);
+        setLoading(false);
+      }
+    };
+    loadReviews();
+  }, []);
 
   const getFilteredAndSortedReviews = () => {
     let filtered = [...reviews];
@@ -96,6 +129,22 @@ const ReviewsList = ({ doctorId, showForm = true }) => {
   };
 
   const filteredReviews = getFilteredAndSortedReviews();
+  const totalPages = Math.ceil(filteredReviews.length / ITEMS_PER_PAGE);
+  const paginatedReviews = filteredReviews.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  // Handle page changes
+  const handlePageChange = (newPage) => {
+    setCurrentPage(Math.min(Math.max(1, newPage), totalPages));
+    window.scrollTo(0, 0);
+  };
+
+  // Reset page when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterRating, sortBy]);
 
   return (
     <VStack spacing={6} align="stretch" w="full">
@@ -110,7 +159,7 @@ const ReviewsList = ({ doctorId, showForm = true }) => {
 
       <Box>
         <HStack justify="space-between" mb={6}>
-          <Heading size="md">Reviews ({reviews.length})</Heading>
+          <Heading size="md">Reviews ({filteredReviews.length})</Heading>
           <HStack spacing={4}>
             <InputGroup maxW="300px">
               <InputLeftElement>
@@ -148,7 +197,9 @@ const ReviewsList = ({ doctorId, showForm = true }) => {
           </HStack>
         </HStack>
 
-        {filteredReviews.length === 0 ? (
+        {loading ? (
+          <ReviewListSkeleton count={6} />
+        ) : filteredReviews.length === 0 ? (
           <Box
             textAlign="center"
             py={8}
@@ -160,11 +211,84 @@ const ReviewsList = ({ doctorId, showForm = true }) => {
             <Text color="gray.600">No reviews found</Text>
           </Box>
         ) : (
-          <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
-            {filteredReviews.map((review) => (
-              <ReviewCard key={review.id} review={review} />
-            ))}
-          </SimpleGrid>
+          <VStack spacing={6} align="stretch">
+            <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
+              {paginatedReviews.map((review) => (
+                <ReviewCard key={review.id} review={review} />
+              ))}
+            </SimpleGrid>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <HStack justify="center" spacing={2} mt={6}>
+                <ButtonGroup variant="outline" spacing={2}>
+                  <PaginationButton
+                    icon={ChevronsLeft}
+                    onClick={() => handlePageChange(1)}
+                    isDisabled={currentPage === 1}
+                    label="First page"
+                  />
+                  <PaginationButton
+                    icon={ChevronLeft}
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    isDisabled={currentPage === 1}
+                    label="Previous page"
+                  />
+
+                  <HStack spacing={1}>
+                    {[...Array(totalPages)].map((_, index) => {
+                      const pageNumber = index + 1;
+                      // Show current page and one page before/after
+                      if (
+                        pageNumber === 1 ||
+                        pageNumber === totalPages ||
+                        Math.abs(pageNumber - currentPage) <= 1
+                      ) {
+                        return (
+                          <Button
+                            key={pageNumber}
+                            variant={
+                              pageNumber === currentPage ? 'solid' : 'outline'
+                            }
+                            colorScheme={
+                              pageNumber === currentPage ? 'blue' : 'gray'
+                            }
+                            onClick={() => handlePageChange(pageNumber)}
+                            size="sm"
+                          >
+                            {pageNumber}
+                          </Button>
+                        );
+                      } else if (
+                        pageNumber === currentPage - 2 ||
+                        pageNumber === currentPage + 2
+                      ) {
+                        return (
+                          <Text key={pageNumber} color="gray.500">
+                            ...
+                          </Text>
+                        );
+                      }
+                      return null;
+                    })}
+                  </HStack>
+
+                  <PaginationButton
+                    icon={ChevronRight}
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    isDisabled={currentPage === totalPages}
+                    label="Next page"
+                  />
+                  <PaginationButton
+                    icon={ChevronsRight}
+                    onClick={() => handlePageChange(totalPages)}
+                    isDisabled={currentPage === totalPages}
+                    label="Last page"
+                  />
+                </ButtonGroup>
+              </HStack>
+            )}
+          </VStack>
         )}
       </Box>
     </VStack>

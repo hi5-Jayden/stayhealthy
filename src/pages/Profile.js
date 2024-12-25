@@ -1,11 +1,11 @@
 // src/pages/Profile.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
   SimpleGrid,
   VStack,
-  HStack, // Added missing import
+  HStack,
   Heading,
   Text,
   Button,
@@ -22,21 +22,86 @@ import {
   ListItem,
   Divider,
   useDisclosure,
+  Center,
+  Spinner,
 } from '@chakra-ui/react';
-import { Calendar, Clock, FileText, Edit2 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext'; // Fixed import path
-import { useNotification } from '../context/NotificationContext'; // Fixed import path
-
-// Import the missing components
+import { Edit2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useNotification } from '../context/NotificationContext';
 import ProfileAppointmentsList from '../components/profile/ProfileAppointmentsList';
 import MedicalReportsList from '../components/profile/MedicalReportsList';
 import EditProfileModal from '../components/profile/EditProfileModal';
 import ConsultationHistoryView from '../components/profile/ConsultationHistoryView';
+import { ProfileSkeleton } from '../components/common/LoadingSkeletons';
 
+// Profile page component
 const Profile = () => {
   const { user } = useAuth();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [activeTab, setActiveTab] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [profileData, setProfileData] = useState(null);
+
+  useEffect(() => {
+    const loadProfileData = async () => {
+      setLoading(true);
+      try {
+        // Simulate API call
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        setProfileData({
+          // In real app, this would come from API
+          name: user?.name,
+          email: user?.email,
+          phone: user?.phone,
+          type: user?.type,
+          profilePicture: user?.profilePicture,
+        });
+      } catch (error) {
+        console.error('Failed to load profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProfileData();
+  }, [user]);
+
+  if (loading) {
+    return (
+      <Container maxW="6xl" py={8}>
+        <SimpleGrid columns={{ base: 1, md: 4 }} spacing={8}>
+          {/* Profile Summary Skeleton */}
+          <ProfileSkeleton />
+
+          {/* Main Content Skeleton */}
+          <Card gridColumn={{ base: 'span 1', md: 'span 3' }}>
+            <CardBody>
+              <VStack spacing={6} align="stretch">
+                <HStack spacing={4}>
+                  {[...Array(3)].map((_, i) => (
+                    <Box
+                      key={i}
+                      height="10"
+                      width="24"
+                      bg="gray.100"
+                      borderRadius="md"
+                      animate={{ opacity: [0.5, 1, 0.5] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    />
+                  ))}
+                </HStack>
+                <Box height="400px" bg="gray.50" borderRadius="lg" p={6}>
+                  <Center h="full">
+                    <Spinner size="xl" color="blue.500" />
+                  </Center>
+                </Box>
+              </VStack>
+            </CardBody>
+          </Card>
+        </SimpleGrid>
+      </Container>
+    );
+  }
 
   return (
     <Container maxW="6xl" py={8}>
@@ -45,11 +110,15 @@ const Profile = () => {
         <Card gridColumn={{ base: 'span 1', md: 'span 1' }}>
           <CardBody>
             <VStack spacing={4} align="center">
-              <Avatar size="2xl" name={user?.name} src={user?.profilePicture} />
+              <Avatar
+                size="2xl"
+                name={profileData?.name}
+                src={profileData?.profilePicture}
+              />
               <VStack spacing={1}>
-                <Heading size="md">{user?.name}</Heading>
-                <Text color="gray.600">{user?.email}</Text>
-                <Badge>{user?.type}</Badge>
+                <Heading size="md">{profileData?.name}</Heading>
+                <Text color="gray.600">{profileData?.email}</Text>
+                <Badge>{profileData?.type}</Badge>
               </VStack>
               <Button
                 leftIcon={<Edit2 size={16} />}
@@ -76,21 +145,11 @@ const Profile = () => {
 
               <TabPanels>
                 <TabPanel>
-                  <VStack align="stretch" spacing={4}>
-                    <Heading size="md" mb={4}>
-                      Your Appointments
-                    </Heading>
-                    <ProfileAppointmentsList />
-                  </VStack>
+                  <ProfileAppointmentsList />
                 </TabPanel>
 
                 <TabPanel>
-                  <VStack align="stretch" spacing={4}>
-                    <Heading size="md" mb={4}>
-                      Medical Reports
-                    </Heading>
-                    <MedicalReportsList />
-                  </VStack>
+                  <MedicalReportsList />
                 </TabPanel>
 
                 <TabPanel>
@@ -99,22 +158,22 @@ const Profile = () => {
                     <List spacing={4}>
                       <ListItem>
                         <Text color="gray.600">Full Name</Text>
-                        <Text fontWeight="medium">{user?.name}</Text>
+                        <Text fontWeight="medium">{profileData?.name}</Text>
                       </ListItem>
                       <Divider />
                       <ListItem>
                         <Text color="gray.600">Email</Text>
-                        <Text fontWeight="medium">{user?.email}</Text>
+                        <Text fontWeight="medium">{profileData?.email}</Text>
                       </ListItem>
                       <Divider />
                       <ListItem>
                         <Text color="gray.600">Phone</Text>
-                        <Text fontWeight="medium">{user?.phone}</Text>
+                        <Text fontWeight="medium">{profileData?.phone}</Text>
                       </ListItem>
                       <Divider />
                       <ListItem>
                         <Text color="gray.600">Account Type</Text>
-                        <Text fontWeight="medium">{user?.type}</Text>
+                        <Text fontWeight="medium">{profileData?.type}</Text>
                       </ListItem>
                     </List>
                   </VStack>
@@ -126,7 +185,11 @@ const Profile = () => {
       </SimpleGrid>
 
       {/* Edit Profile Modal */}
-      <EditProfileModal isOpen={isOpen} onClose={onClose} currentUser={user} />
+      <EditProfileModal
+        isOpen={isOpen}
+        onClose={onClose}
+        currentUser={profileData}
+      />
     </Container>
   );
 };
