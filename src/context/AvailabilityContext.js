@@ -8,20 +8,54 @@ export const AvailabilityProvider = ({ children }) => {
   const [availabilityData, setAvailabilityData] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [subscribers, setSubscribers] = useState(new Map());
   const toast = useToast();
 
-  // Fetch doctor's availability for a specific date
+  // Subscribe to real-time updates for a doctor
+  const subscribeToAvailability = useCallback((doctorId, callback) => {
+    setSubscribers((prev) =>
+      new Map(prev).set(doctorId, [...(prev.get(doctorId) || []), callback])
+    );
+    return () => unsubscribeFromAvailability(doctorId, callback);
+  }, []);
+
+  // Unsubscribe from updates
+  const unsubscribeFromAvailability = useCallback((doctorId, callback) => {
+    setSubscribers((prev) => {
+      const newMap = new Map(prev);
+      const callbacks = prev.get(doctorId) || [];
+      newMap.set(
+        doctorId,
+        callbacks.filter((cb) => cb !== callback)
+      );
+      return newMap;
+    });
+  }, []);
+
+  // Notify subscribers of updates
+  const notifySubscribers = useCallback(
+    (doctorId, update) => {
+      const doctorSubscribers = subscribers.get(doctorId) || [];
+      doctorSubscribers.forEach((callback) => callback(update));
+    },
+    [subscribers]
+  );
+
+  // Fetch doctor's availability
   const fetchDoctorAvailability = useCallback(
     async (doctorId, date) => {
       setLoading(true);
       setError(null);
       try {
         // In production, this would be a real-time API call
-        // For now, simulating with mock data
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        // Simulating with mock data and random delays
+        await new Promise((resolve) =>
+          setTimeout(resolve, Math.random() * 500)
+        );
 
         const mockTimeSlots = generateMockTimeSlots(date);
 
+        // Update availability data
         setAvailabilityData((prev) => ({
           ...prev,
           [doctorId]: {
@@ -29,6 +63,14 @@ export const AvailabilityProvider = ({ children }) => {
             [date]: mockTimeSlots,
           },
         }));
+
+        // Notify subscribers of the update
+        notifySubscribers(doctorId, {
+          doctorId,
+          date,
+          slots: mockTimeSlots,
+          timestamp: Date.now(),
+        });
 
         return mockTimeSlots;
       } catch (err) {
@@ -44,18 +86,43 @@ export const AvailabilityProvider = ({ children }) => {
         setLoading(false);
       }
     },
-    [toast]
+    [toast, notifySubscribers]
   );
 
-  // Check if a specific time slot is available
+  // Check slot availability in real-time
   const checkSlotAvailability = useCallback(
     async (doctorId, date, timeSlot) => {
       try {
-        // In production, this would be a real-time check
-        await new Promise((resolve) => setTimeout(resolve, 200));
+        // Simulate real-time check with random delay
+        await new Promise((resolve) =>
+          setTimeout(resolve, Math.random() * 200)
+        );
 
         const doctorSlots = availabilityData[doctorId]?.[date] || [];
-        return doctorSlots.includes(timeSlot);
+        const isAvailable = doctorSlots.includes(timeSlot);
+
+        // Randomly simulate slot becoming unavailable (10% chance)
+        if (isAvailable && Math.random() < 0.1) {
+          const updatedSlots = doctorSlots.filter((slot) => slot !== timeSlot);
+          setAvailabilityData((prev) => ({
+            ...prev,
+            [doctorId]: {
+              ...prev[doctorId],
+              [date]: updatedSlots,
+            },
+          }));
+
+          notifySubscribers(doctorId, {
+            doctorId,
+            date,
+            slots: updatedSlots,
+            timestamp: Date.now(),
+          });
+
+          return false;
+        }
+
+        return isAvailable;
       } catch (err) {
         toast({
           title: 'Error',
@@ -66,43 +133,7 @@ export const AvailabilityProvider = ({ children }) => {
         return false;
       }
     },
-    [availabilityData, toast]
-  );
-
-  // Reserve a time slot
-  const reserveTimeSlot = useCallback(
-    async (doctorId, date, timeSlot) => {
-      try {
-        // In production, this would make an API call to reserve the slot
-        await new Promise((resolve) => setTimeout(resolve, 300));
-
-        setAvailabilityData((prev) => {
-          const doctorSlots = [...(prev[doctorId]?.[date] || [])];
-          const slotIndex = doctorSlots.indexOf(timeSlot);
-          if (slotIndex > -1) {
-            doctorSlots.splice(slotIndex, 1);
-          }
-          return {
-            ...prev,
-            [doctorId]: {
-              ...prev[doctorId],
-              [date]: doctorSlots,
-            },
-          };
-        });
-
-        return true;
-      } catch (err) {
-        toast({
-          title: 'Error',
-          description: 'Failed to reserve time slot',
-          status: 'error',
-          duration: 3000,
-        });
-        return false;
-      }
-    },
-    [toast]
+    [availabilityData, toast, notifySubscribers]
   );
 
   // Helper function to generate mock time slots
@@ -141,7 +172,8 @@ export const AvailabilityProvider = ({ children }) => {
       });
     }
 
-    return baseSlots;
+    // Randomly remove some slots to simulate unavailability
+    return baseSlots.filter(() => Math.random() > 0.3);
   };
 
   const value = {
@@ -150,7 +182,8 @@ export const AvailabilityProvider = ({ children }) => {
     error,
     fetchDoctorAvailability,
     checkSlotAvailability,
-    reserveTimeSlot,
+    subscribeToAvailability,
+    unsubscribeFromAvailability,
   };
 
   return (
