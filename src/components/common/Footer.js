@@ -1,3 +1,4 @@
+// src/components/common/Footer.js
 import React from 'react';
 import {
   Box,
@@ -7,22 +8,33 @@ import {
   Text,
   Heading,
   Link,
+  HStack,
 } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
 
+// Reusable Logo Component
+const Logo = ({ fontSize = '24px', spacing = '2' }) => (
+  <HStack spacing={spacing}>
+    <Text fontSize={fontSize} fontWeight="bold" color="#4169E1">
+      StayHealthy
+    </Text>
+    <Box as="span" color="#4169E1" fontSize={fontSize} ml="-1">
+      +
+    </Box>
+  </HStack>
+);
+
 const Footer = () => {
   return (
-    <Box bg="gray.50" color="gray.700" mt="auto">
+    <Box bg="white" color="gray.700" mt="auto">
+      {' '}
+      {/* Updated background color to match */}
       <Container maxW="1200px" py="12">
         <SimpleGrid columns={{ base: 1, md: 4 }} spacing="8">
           {/* Brand Column */}
           <Stack spacing="6">
             <Box>
-              <img
-                src="/api/placeholder/120/40"
-                alt="StayHealthy Logo"
-                style={{ height: '40px' }}
-              />
+              <Logo fontSize="20px" spacing="1" />
             </Box>
             <Text fontSize="sm">Your Health, Our Responsibility</Text>
           </Stack>

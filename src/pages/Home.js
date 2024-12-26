@@ -1,15 +1,15 @@
-import React from 'react';
+// src/pages/Home.js
+import React, { useState } from 'react';
 import {
   Box,
   Container,
+  SimpleGrid,
+  VStack,
   Heading,
   Text,
-  VStack,
-  SimpleGrid,
+  Image,
   Card,
   CardBody,
-  Image,
-  useDisclosure,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -17,39 +17,46 @@ import {
   ModalBody,
   ModalFooter,
   Button,
+  useDisclosure,
 } from '@chakra-ui/react';
-import { useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { MessageCircle, Calendar, Stethoscope, Heart } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-const ServiceCard = ({ title, imageSrc, isProtected, onClick }) => (
+// ServiceCard Component
+const ServiceCard = ({
+  title,
+  icon: Icon,
+  isSelected,
+  isProtected,
+  onClick,
+}) => (
   <Card
     cursor="pointer"
     overflow="hidden"
     variant="outline"
+    bg={isSelected ? 'blue.50' : 'white'}
+    borderColor={isSelected ? 'blue.200' : 'gray.200'}
+    onClick={onClick}
     _hover={{
-      transform: 'translateY(-4px)',
-      boxShadow: 'md',
       borderColor: 'blue.200',
+      transform: 'translateY(-2px)',
+      boxShadow: 'sm',
     }}
     transition="all 0.2s"
-    onClick={onClick}
   >
     <CardBody>
       <VStack spacing="4" align="center">
-        <Box boxSize="100px" bg="gray.100" borderRadius="lg">
-          <Image
-            src="/api/placeholder/100/100"
-            alt={title}
-            boxSize="100px"
-            objectFit="cover"
-          />
-        </Box>
-        <Text
-          fontWeight="500"
-          fontSize="lg"
-          textAlign="center"
-          color="gray.800"
+        <Box
+          p="3"
+          borderRadius="full"
+          bg={isSelected ? 'blue.100' : 'blue.50'}
+          color="#4169E1"
+          display="inline-flex"
         >
+          <Icon size={24} />
+        </Box>
+        <Text fontWeight="500" textAlign="center" color="gray.800">
           {title}
         </Text>
       </VStack>
@@ -61,26 +68,34 @@ const Home = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [selectedService, setSelectedService] = React.useState(null);
+  const [selectedService, setSelectedService] = useState(null);
 
   const services = [
     {
       title: 'Instant Consultation',
+      icon: MessageCircle,
+      isSelected: false,
       isProtected: true,
       path: '/services/instant-consultation',
     },
     {
-      title: 'Book an Appointment',
+      title: 'Book Appointment',
+      icon: Calendar,
+      isSelected: true,
       isProtected: true,
       path: '/services/book-appointment',
     },
     {
       title: 'Self Check-up',
+      icon: Stethoscope,
+      isSelected: false,
       isProtected: false,
       path: '/services/self-checkup',
     },
     {
-      title: 'Health Tips\nand Guidance',
+      title: 'Health Tips',
+      icon: Heart,
+      isSelected: false,
       isProtected: false,
       path: '/services/health-tips',
     },
@@ -101,9 +116,9 @@ const Home = () => {
   };
 
   return (
-    <Box>
+    <Box position="relative" bg="white">
       {/* Hero Section */}
-      <Box bg="gray.50" pt="20" pb="32">
+      <Box pt="6" pb="0">
         <Container maxW="1200px">
           <SimpleGrid
             columns={{ base: 1, md: 2 }}
@@ -114,7 +129,12 @@ const Home = () => {
             <VStack align="start" spacing="6">
               <Heading as="h1" size="2xl" lineHeight="1.2" color="gray.900">
                 Your Health
-                <Text as="span" display="block" color="blue.500">
+                <Text
+                  as="span"
+                  display="block"
+                  color="blue.500"
+                  fontSize="inherit"
+                >
                   Our Responsibility
                 </Text>
               </Heading>
@@ -123,10 +143,12 @@ const Home = () => {
             {/* Right side image */}
             <Box>
               <Image
-                src="/api/placeholder/600/500"
+                src="/assets/images/ui/hero-doctor.png"
                 alt="Doctor with laptop"
                 w="full"
                 h="auto"
+                objectFit="contain"
+                loading="eager"
               />
             </Box>
           </SimpleGrid>
@@ -134,14 +156,26 @@ const Home = () => {
       </Box>
 
       {/* Services Section */}
-      <Box transform="translateY(-100px)">
+      <Box position="relative" mt="-200px" zIndex="1">
         <Container maxW="1200px">
-          <Card bg="white" shadow="lg" py="8">
-            <CardBody>
-              <VStack spacing="8">
-                <Heading as="h2" size="lg">
-                  Our Best Services
-                </Heading>
+          <VStack spacing={0}>
+            <Heading
+              as="h2"
+              size="lg"
+              bg="white"
+              px="6"
+              py="3"
+              rounded="lg"
+              shadow="sm"
+              mb="-15px"
+              zIndex="2"
+              position="relative"
+            >
+              Our Best Services
+            </Heading>
+
+            <Card w="full" bg="white" shadow="xl" pt="12" pb="8">
+              <CardBody>
                 <SimpleGrid
                   columns={{ base: 1, sm: 2, lg: 4 }}
                   spacing="6"
@@ -151,22 +185,14 @@ const Home = () => {
                   {services.map((service) => (
                     <ServiceCard
                       key={service.title}
-                      title={service.title}
-                      isProtected={service.isProtected}
-                      onClick={() => {
-                        if (service.isProtected && !isAuthenticated) {
-                          setSelectedService(service);
-                          onOpen();
-                        } else {
-                          navigate(service.path);
-                        }
-                      }}
+                      {...service}
+                      onClick={() => handleServiceClick(service)}
                     />
                   ))}
                 </SimpleGrid>
-              </VStack>
-            </CardBody>
-          </Card>
+              </CardBody>
+            </Card>
+          </VStack>
         </Container>
       </Box>
 

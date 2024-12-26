@@ -1,3 +1,4 @@
+// src/pages/Services.js
 import React from 'react';
 import {
   Box,
@@ -10,7 +11,7 @@ import {
   Button,
 } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
-import { Clock, Calendar, Stethoscope, Heart } from 'lucide-react';
+import { MessageCircle, Calendar, Stethoscope, Heart } from 'lucide-react';
 
 const ServiceCard = ({ title, description, icon: Icon, link, isPublic }) => (
   <Box
@@ -24,9 +25,9 @@ const ServiceCard = ({ title, description, icon: Icon, link, isPublic }) => (
     <Stack spacing="4" align="flex-start">
       <Box
         p="3"
-        borderRadius="md"
-        bg="brand.primary.500"
-        color="white"
+        borderRadius="full"
+        bg="blue.50"
+        color="#4169E1"
         display="inline-flex"
       >
         <Icon size={24} />
@@ -53,7 +54,7 @@ const Services = () => {
       title: 'Instant Consultation',
       description:
         'Connect with doctors instantly for immediate medical advice and consultations from the comfort of your home.',
-      icon: Clock,
+      icon: MessageCircle,
       link: '/services/instant-consult',
       isPublic: false,
     },
