@@ -1,7 +1,8 @@
+// src/components/services/ServiceCard.js
 import React from 'react';
 import { Box, VStack, Text } from '@chakra-ui/react';
 
-const ServiceCard = ({ title, icon: Icon, onClick }) => {
+const ServiceCard = ({ title, icon: Icon, onClick, isProtected }) => {
   return (
     <Box
       as="button"

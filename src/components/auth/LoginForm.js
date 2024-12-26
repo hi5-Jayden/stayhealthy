@@ -1,3 +1,4 @@
+// src/components/auth/LoginForm.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -14,7 +15,7 @@ import {
 import { Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
-const LoginForm = () => {
+const LoginForm = ({ returnPath }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login, loading } = useAuth();
@@ -25,7 +26,8 @@ const LoginForm = () => {
     e.preventDefault();
     try {
       await login(email, password);
-      navigate('/');
+      const redirectPath = returnPath || '/';
+      navigate(redirectPath);
       toast({
         title: 'Login successful',
         status: 'success',
@@ -73,15 +75,16 @@ const LoginForm = () => {
         type="submit"
         isLoading={loading}
         w="full"
-        bgGradient="linear(to-r, brand.primary.500, #6F3AFA)"
+        bg="#4169E1"
         color="white"
+        _hover={{ bg: 'blue.600' }}
       >
-        Login
+        Log In
       </Button>
 
       <Text>
         Don't have an account?{' '}
-        <Link as={RouterLink} to="/signup" color="brand.primary.500">
+        <Link as={RouterLink} to="/signup" color="#4169E1">
           Sign up
         </Link>
       </Text>
